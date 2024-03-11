@@ -1,9 +1,13 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:reward_app/util/Global/Global.dart';
 import 'package:reward_app/util/images/imageConstant.dart';
 import 'package:reward_app/util/routes/routes_name.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -14,6 +18,23 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   @override
+  void initState() {
+    super.initState();
+    getValue();
+    log("Setting SCreen");
+  }
+
+  getValue() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+
+   setState(() {
+     Globals.getNumber = preferences.getString(Globals.mobileKey);
+   });
+
+    log("Globals ${Globals.getNumber}");
+  }
+
+  @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
@@ -23,8 +44,9 @@ class _SettingScreenState extends State<SettingScreen> {
           'Setting',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Color(0xFF1E1E1E),
-          ),
+              color: Color(0xFF1E1E1E),
+              fontSize: 18,
+              fontWeight: FontWeight.bold),
         ),
       ),
       body: Container(
@@ -40,6 +62,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   CircleAvatar(),
                   Gap(10),
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Mobile Number',
@@ -50,7 +73,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                       ),
                       Text(
-                        '98765 20200',
+                        Globals.getNumber.toString(),
                         style: TextStyle(
                           color: Color(0xFF1E1E1E),
                           fontSize: 16,

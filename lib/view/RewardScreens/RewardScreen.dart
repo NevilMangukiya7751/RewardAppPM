@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, avoid_print
 
 import 'dart:async';
 import 'dart:developer';
@@ -9,6 +9,7 @@ import 'package:reward_app/data/SharedPreferences/preferences.dart';
 import 'package:reward_app/res/Common.dart';
 import 'package:reward_app/util/images/imageConstant.dart';
 import 'package:reward_app/util/routes/routes_name.dart';
+import 'package:reward_app/view_model/services/splash_services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,13 +21,13 @@ class RewardScreen extends StatefulWidget {
 }
 
 class _RewardScreenState extends State<RewardScreen> {
-  int currentDay = 1;
-  int totalDays = 7;
-  int collectedCoins = 0;
+  // int currentDay = 1;
+  // int totalDays = 7;
+  // int collectedCoins = 0;
 
-  bool freecoin = false;
+  // bool freecoin = false;
 
-  bool loading = false;
+  // bool loading = false;
 
   int tapCount = 0;
 
@@ -36,10 +37,10 @@ class _RewardScreenState extends State<RewardScreen> {
   void initState() {
     super.initState();
     getFreeCoin();
-    getDailyCheckIn();
+    splashServices.getDailyCheckIn();
     checkIfCanCollect();
     getCollectedCoin();
-    getWatchRewardAd();
+    splashServices.getWatchRewardAd();
     nextDeadline = getNextDeadline(date);
     deadLine();
     loadListFromSharedPreferences().then((loadedList) {
@@ -49,6 +50,7 @@ class _RewardScreenState extends State<RewardScreen> {
     });
   }
 
+  SplashServices splashServices = SplashServices();
   bool canCollect = true;
 
   void addItemToList(String newItem) {
@@ -65,10 +67,11 @@ class _RewardScreenState extends State<RewardScreen> {
   final date = DateTime.now();
   var nextDeadline;
   Future<void> checkIfCanCollect() async {
-    canCollect = false;
+    log("checkIfCanCollect...");
+    Preferences.collectedCoin = false;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String lastCollectionTimeString =
-        prefs.getString('last_collection_time') ?? '';
+        prefs.getString(Preferences.collectCoin) ?? '';
 
     if (lastCollectionTimeString.isNotEmpty) {
       DateTime lastCollectionTime = DateTime.parse(lastCollectionTimeString);
@@ -87,14 +90,16 @@ class _RewardScreenState extends State<RewardScreen> {
 
       // Check if the current time is after 12 PM (noon) of the same day as lastCollectionTime
       if (now.isAfter(endOfDayLastCollectionTime.add(Duration(hours: 12)))) {
-        canCollect = true;
+        /*canCollect = true;*/
+        Preferences.collectedCoin = true;
       }
     } else {
       // If 'last_collection_time' is not set, you can consider it as the first collection
-      canCollect = true;
+      // canCollect = true;
+      Preferences.collectedCoin = true;
     }
 
-    if (canCollect) {
+    if (Preferences.collectedCoin!) {
       // Perform the actions for collecting
       // For example:
       // collect();
@@ -126,50 +131,13 @@ class _RewardScreenState extends State<RewardScreen> {
     return todaysDeadline.add(Duration(days: 1));
   }
 
-  getAmount() async {
-    log("getAmount....");
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    Preferences.getTotalAmount = preferences.getInt(Preferences.setAmount)!;
-  }
-
-  getDailyCheckIn() async {
-    log("getDailyCheckIn....");
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    Preferences.getTotalDailyCheck =
-        preferences.getInt(Preferences.dailyCheckIn)!;
-    log("getDailyCheckIn....${Preferences.getTotalDailyCheck}");
-  }
-
-  getWatchRewardAd() async {
-    log("getWatchRewardAd....");
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    Preferences.getWatchRewardAd =
-        preferences.getInt(Preferences.setWatchRewardAd)!;
-    log("getWatchRewardAd....${Preferences.getWatchRewardAd}");
-  }
-
   getFreeCoin() async {
     log("getFreeCoin....");
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       Preferences.freeCoins = preferences.getBool(Preferences.freeCoin);
     });
-    /*if (Preferences.freeCoins == true) {
-      log("if ${Preferences.freeCoins}");
-      Timer.periodic(Duration(minutes: 2), (timer) {
-        log("timer $timer");
-        setState(() {
-          Preferences.freeCoins = false;
-        });
-      });
-    } else {
-      log("else ${Preferences.freeCoins}");
-      // Timer.periodic(Duration(seconds: 30), (timer) {
-      //   setState(() {
-      //     Preferences.freeCoins = false;
-      //   });
-      // });
-    }*/
+
     log("Done. ${Preferences.freeCoins}");
   }
 
@@ -178,7 +146,8 @@ class _RewardScreenState extends State<RewardScreen> {
     setState(() {
       Preferences.collectedCoin = preferences.getBool(Preferences.collectCoin);
     });
-    if (Preferences.collectedCoin == true) {
+
+    /*  if (Preferences.collectedCoin == true) {
       log("if collectedCoin ${Preferences.collectedCoin}");
       Timer.periodic(Duration(minutes: 1440), (timer) {
         setState(() {
@@ -192,7 +161,7 @@ class _RewardScreenState extends State<RewardScreen> {
       //     Preferences.freeCoins = false;
       //   });
       // });
-    }
+    }*/
 
     log("Done. ${Preferences.collectedCoin}");
   }
@@ -206,7 +175,7 @@ class _RewardScreenState extends State<RewardScreen> {
     log("getStringList ${Preferences.getStringList}");
     log("freeCoins ${Preferences.freeCoins}");
 
-    getAmount();
+    splashServices.getAmount();
     saveListToSharedPreferences(myList);
 
     loadListFromSharedPreferences().then((loadedList) {
@@ -342,7 +311,7 @@ class _RewardScreenState extends State<RewardScreen> {
                                 ),
                               ),
                               SizedBox(height: 20),
-                              Container(
+                              SizedBox(
                                   height: 60,
                                   child: ListView.separated(
                                     itemCount: daysList.length,
@@ -458,10 +427,9 @@ class _RewardScreenState extends State<RewardScreen> {
                                             Preferences.totalAmount =
                                                 Preferences.getTotalAmount +
                                                     value;
-                                            // Preferences.totalAmount += 10;
                                             setAmount();
                                           });
-                                          getAmount();
+                                          splashServices.getAmount();
                                           getCollectedCoin();
                                           if (Preferences.collectedCoin ==
                                               true) {
@@ -605,7 +573,7 @@ class _RewardScreenState extends State<RewardScreen> {
                                               setAmount();
                                             });
                                             getFreeCoin();
-                                            getAmount();
+                                            splashServices.getAmount();
                                           },
                                           child: Container(
                                             alignment: Alignment.center,
@@ -723,8 +691,8 @@ class _RewardScreenState extends State<RewardScreen> {
                                                 setAmount();
                                               });
                                               getFreeCoin();
-                                              getAmount();
-                                              getDailyCheckIn();
+                                              splashServices.getAmount();
+                                              splashServices.getDailyCheckIn();
                                               if (Preferences
                                                       .getTotalDailyCheck ==
                                                   3) {
@@ -863,8 +831,8 @@ class _RewardScreenState extends State<RewardScreen> {
                                                 setAmount();
                                               });
                                               getFreeCoin();
-                                              getAmount();
-                                              getWatchRewardAd();
+                                              splashServices.getAmount();
+                                              splashServices.getWatchRewardAd();
                                               if (Preferences
                                                       .getWatchRewardAd ==
                                                   2) {
@@ -953,7 +921,7 @@ class _RewardScreenState extends State<RewardScreen> {
                                             Preferences.getTotalAmount + 20;
                                         setAmount();
                                       });
-                                      getAmount();
+                                      splashServices.getAmount();
                                     },
                                     child: Container(
                                       alignment: Alignment.center,
@@ -1039,7 +1007,7 @@ class _RewardScreenState extends State<RewardScreen> {
                                           Preferences.getTotalAmount + 20;
                                       setAmount();
                                     });
-                                    getAmount();
+                                    splashServices.getAmount();
                                   });
                                 },
                                 child: Container(

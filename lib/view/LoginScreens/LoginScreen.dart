@@ -1,7 +1,11 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_build_context_synchronously
 
+import 'dart:developer';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../FirebaseHelpers/Firebase_Helper.dart';
 import '../../util/routes/routes_name.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -35,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(
                       color: Color(0xFF1E1E1E),
                       fontSize: 22,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
@@ -76,6 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextFormField(
                 controller: phoneController,
                 cursorColor: Color(0xFFE0E0E0),
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   isDense: true,
                   hintText: "Phone Number",
@@ -99,9 +104,49 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 20),
               Center(
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacementNamed(
-                        context, RoutesName.rewardScreen);
+                  onTap: () async {
+                    User? user = await FirebaseAuthHelper.firebaseAuthHelper
+                        .signUpUser(
+                            email: nameController.text,
+                            password: phoneController.text)
+                        .then((value) {
+                      FirebaseAuthHelper.firebaseAuthHelper
+                          .signInUser(
+                              email: nameController.text,
+                              password: phoneController.text)
+                          .then((value) {
+                        log(value!.email!);
+                        Navigator.pushReplacementNamed(
+                            context, RoutesName.rewardScreen);
+                      });
+                    });
+
+                    log("user ${user!.email}");
+                    /*   SharedPreferences pref =
+                        await SharedPreferences.getInstance();
+
+                    setState(() {
+                      pref.setString(Globals.nameKey, nameController.text);
+                      pref.setString(Globals.mobileKey, nameController.text);
+                    });
+                    if (nameController.text.isEmpty &&
+                        phoneController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          backgroundColor: Colors.red,
+                          content: Text(
+                            "Enter Valid Credintials",
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.w500),
+                          )));
+                    } else {
+                      if (phoneController.text.length == 10) {
+                        Navigator.pushReplacementNamed(
+                            context, RoutesName.rewardScreen);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Enter Valid Number")));
+                      }
+                    }*/
                   },
                   child: Container(
                     alignment: Alignment.center,

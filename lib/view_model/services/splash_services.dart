@@ -1,8 +1,11 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../data/SharedPreferences/preferences.dart';
 import '../../util/routes/routes_name.dart';
 
 class SplashServices {
@@ -21,6 +24,28 @@ class SplashServices {
   //     Navigator.pushNamed(context, RoutesName.homeScreen);
   //   }
   // }
+
+  getWatchRewardAd() async {
+    log("getWatchRewardAd....");
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    Preferences.getWatchRewardAd =
+        preferences.getInt(Preferences.setWatchRewardAd)!;
+    log("getWatchRewardAd....${Preferences.getWatchRewardAd}");
+  }
+
+  getAmount() async {
+    log("getAmount....");
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    Preferences.getTotalAmount = preferences.getInt(Preferences.setAmount)!;
+  }
+
+  getDailyCheckIn() async {
+    log("getDailyCheckIn....");
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    Preferences.getTotalDailyCheck =
+        preferences.getInt(Preferences.dailyCheckIn)!;
+    log("getDailyCheckIn....${Preferences.getTotalDailyCheck}");
+  }
 
   checkAuthentication(context) async {
     await Future.delayed(Duration(seconds: 3), () {

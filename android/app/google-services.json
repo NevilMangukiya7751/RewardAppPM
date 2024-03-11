@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "911567502179",
+    "project_id": "rewardapp-20e40",
+    "storage_bucket": "rewardapp-20e40.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:911567502179:android:3e21bf3fec4fa2c0333156",
+        "android_client_info": {
+          "package_name": "com.example.reward_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "911567502179-vofmc27fls3udjgp5cd4v4dj9hn071s5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.reward_app",
+            "certificate_hash": "7d7258b1c549d3f4daaa6d22861353e2acbf50cd"
+          }
+        },
+        {
+          "client_id": "911567502179-4mfro2u4kfr0om86h7nco99qgvpgvf8k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLLw7Ew5pEbQF6U5WqFF03F2n6CRvlDhw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "911567502179-4mfro2u4kfr0om86h7nco99qgvpgvf8k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

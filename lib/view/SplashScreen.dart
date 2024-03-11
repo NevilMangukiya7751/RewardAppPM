@@ -1,11 +1,14 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:reward_app/util/Global/Global.dart';
 import 'package:reward_app/util/images/imageConstant.dart';
 import 'package:reward_app/util/routes/routes_name.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,9 +21,28 @@ class _SplashScreenState extends State<SplashScreen> {
   late BannerAd _bottomBannerAd;
   bool _isBottomBannerAdLoaded = false;
 
+  String? storeValue;
+  getValue() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+
+    setState(() {
+      storeValue = preferences.getString(Globals.mobileKey);
+    });
+
+    log("glooo $storeValue");
+
+    if (storeValue != null) {
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.pushReplacementNamed(context, RoutesName.rewardScreen);
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    getValue();
+
     _createBottomBannerAd();
   }
 
