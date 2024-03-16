@@ -9,6 +9,9 @@ import 'package:reward_app/util/images/imageConstant.dart';
 import 'package:reward_app/util/routes/routes_name.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/SharedPreferences/preferences.dart';
+import '../res/Common.dart';
+
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
 
@@ -27,9 +30,9 @@ class _SettingScreenState extends State<SettingScreen> {
   getValue() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
 
-   setState(() {
-     Globals.getNumber = preferences.getString(Globals.mobileKey);
-   });
+    setState(() {
+      Globals.getNumber = preferences.getString(Globals.mobileKey);
+    });
 
     log("Globals ${Globals.getNumber}");
   }
@@ -122,39 +125,48 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
             ),
             Gap(20),
-            Container(
-              padding: EdgeInsets.only(left: 5),
-              child: Row(
-                children: [
-                  Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(10),
+            GestureDetector(
+              onTap: () {
+                log("ss");
+                setState(() {
+                  Preferences.totalAmount = Preferences.getTotalAmount + 50;
+                });
+                setAmount();
+              },
+              child: Container(
+                padding: EdgeInsets.only(left: 5),
+                child: Row(
+                  children: [
+                    Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: ImageIcon(
+                        AssetImage(ImageConstant.invite),
+                        color: Colors.white,
+                        size: 15,
+                      ),
                     ),
-                    child: ImageIcon(
-                      AssetImage(ImageConstant.invite),
-                      color: Colors.white,
-                      size: 15,
+                    Gap(10),
+                    Text(
+                      'Invite Friends',
+                      style: TextStyle(
+                        color: Color(0xFF1E1E1E),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        height: 0,
+                      ),
                     ),
-                  ),
-                  Gap(10),
-                  Text(
-                    'Invite Friends',
-                    style: TextStyle(
-                      color: Color(0xFF1E1E1E),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      height: 0,
+                    Spacer(),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      color: Color(0xffD7D7D7),
                     ),
-                  ),
-                  Spacer(),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: Color(0xffD7D7D7),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             Gap(20),

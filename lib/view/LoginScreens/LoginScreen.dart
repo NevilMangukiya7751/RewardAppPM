@@ -1,11 +1,9 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_build_context_synchronously
 
-import 'dart:developer';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../FirebaseHelpers/Firebase_Helper.dart';
+import '../../util/Global/Global.dart';
 import '../../util/routes/routes_name.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -105,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Center(
                 child: GestureDetector(
                   onTap: () async {
-                    User? user = await FirebaseAuthHelper.firebaseAuthHelper
+                    /*  User? user = await FirebaseAuthHelper.firebaseAuthHelper
                         .signUpUser(
                             email: nameController.text,
                             password: phoneController.text)
@@ -121,13 +119,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       });
                     });
 
-                    log("user ${user!.email}");
-                    /*   SharedPreferences pref =
+                    log("user ${user!.email}");*/
+                    SharedPreferences pref =
                         await SharedPreferences.getInstance();
 
                     setState(() {
                       pref.setString(Globals.nameKey, nameController.text);
-                      pref.setString(Globals.mobileKey, nameController.text);
+                      pref.setString(Globals.mobileKey, phoneController.text);
                     });
                     if (nameController.text.isEmpty &&
                         phoneController.text.isEmpty) {
@@ -146,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text("Enter Valid Number")));
                       }
-                    }*/
+                    }
                   },
                   child: Container(
                     alignment: Alignment.center,
