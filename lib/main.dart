@@ -9,6 +9,8 @@ import 'package:reward_app/util/routes/routes_name.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MobileAds.instance.initialize();
+  MobileAds.instance.updateRequestConfiguration(RequestConfiguration(
+      testDeviceIds: ["C4E8282EA33FB78C433ACBA32A2ABD01"]));
   await Firebase.initializeApp(
     options: FirebaseOptions(
       apiKey: "AIzaSyBLLw7Ew5pEbQF6U5WqFF03F2n6CRvlDhw",

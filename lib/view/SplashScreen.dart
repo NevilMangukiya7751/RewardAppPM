@@ -10,6 +10,8 @@ import 'package:reward_app/util/images/imageConstant.dart';
 import 'package:reward_app/util/routes/routes_name.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/AdHelper/app_constrant.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -52,10 +54,12 @@ class _SplashScreenState extends State<SplashScreen> {
     _bottomBannerAd.dispose();
   }
 
+  InterstitialAd? _interstitialAd;
+
   void _createBottomBannerAd() {
     _bottomBannerAd = BannerAd(
       adUnitId: Platform.isAndroid
-          ? 'ca-app-pub-3940256099942544/6300978111'
+          ? androidGoogleBanner
           : 'ca-app-pub-3940256099942544/2934735716',
       size: AdSize.banner,
       request: AdRequest(),
@@ -71,6 +75,27 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
     );
     _bottomBannerAd.load();
+  }
+
+  void _prepareInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: androidGoogleInterstitial,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(onAdLoaded: (currentAd) {
+        currentAd.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (currentAd) {
+          // Navigator.pushNamed(context, RoutesName.chooseLaunguageScreen);
+          Navigator.pushReplacementNamed(
+              context, RoutesName.chooseLaunguageScreen);
+        });
+        setState(() {
+          _interstitialAd = currentAd;
+          _interstitialAd!.show();
+        });
+      }, onAdFailedToLoad: (error) {
+        print("Failed to load : Flutter AdMob Interstitial Ad");
+      }),
+    );
   }
 
   @override
@@ -120,6 +145,20 @@ class _SplashScreenState extends State<SplashScreen> {
                 onTap: () {
                   Navigator.pushReplacementNamed(
                       context, RoutesName.chooseLaunguageScreen);
+                  // _prepareInterstitialAd();
+                  // FullScreenContentCallback<InterstitialAd>?
+                  //     fullScreenContentCallback = FullScreenContentCallback(
+                  //         onAdDismissedFullScreenContent: (currentAd) {
+                  //   log("aaa ===================================");
+                  //   // Navigator.pushNamed(context, RoutesName.chooseLaunguageScreen);
+                  //   Navigator.pushReplacementNamed(
+                  //       context, RoutesName.chooseLaunguageScreen);
+                  // });
+                  // AdmobHelper().createInterstitial(fullScreenContentCallback);
+                  // Navigator.pushNamed(
+                  //     context, RoutesName.chooseLaunguageScreen);
+                  // Navigator.pushReplacementNamed(
+                  //     context, RoutesName.chooseLaunguageScreen);
                 },
                 child: Container(
                   alignment: Alignment.center,

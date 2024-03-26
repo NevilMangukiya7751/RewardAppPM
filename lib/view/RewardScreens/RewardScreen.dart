@@ -2,9 +2,11 @@
 
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:reward_app/data/SharedPreferences/preferences.dart';
 import 'package:reward_app/res/Common.dart';
 import 'package:reward_app/util/images/imageConstant.dart';
@@ -12,6 +14,9 @@ import 'package:reward_app/util/routes/routes_name.dart';
 import 'package:reward_app/view_model/services/splash_services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../helpers/AdHelper/admob.dart';
+import '../../helpers/AdHelper/app_constrant.dart';
 
 class RewardScreen extends StatefulWidget {
   const RewardScreen({super.key});
@@ -21,21 +26,28 @@ class RewardScreen extends StatefulWidget {
 }
 
 class _RewardScreenState extends State<RewardScreen> {
-  // int currentDay = 1;
-  // int totalDays = 7;
-  // int collectedCoins = 0;
+  RewardedAd? _rewardedAd;
 
-  // bool freecoin = false;
-
-  // bool loading = false;
+  final adUnitId = Platform.isAndroid
+      ? androidGoogleRewardAd
+      : 'ca-app-pub-3940256099942544/1712485313';
 
   int tapCount = 0;
 
   int watchTotalCount = 0;
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _rewardedAd!.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
+    // AdmobHelper().createInterstitial();
+
     getFreeCoin();
     splashServices.getDailyCheckIn();
     checkIfCanCollect();
@@ -181,7 +193,7 @@ class _RewardScreenState extends State<RewardScreen> {
     loadListFromSharedPreferences().then((loadedList) {
       log('Loaded List: $loadedList');
     });
-
+    log("loooo $load");
     return Scaffold(
         backgroundColor: Color(0xfff7f7f7),
         body: SafeArea(
@@ -853,6 +865,14 @@ class _RewardScreenState extends State<RewardScreen> {
                                                 // });
                                               }
                                             }
+                                            loadAd();
+
+                                            // FullScreenContentCallback<
+                                            //         InterstitialAd>?
+                                            //     fullScreenContentCallback =
+                                            //     FullScreenContentCallback();
+                                            // AdmobHelper().createInterstitial(
+                                            //     fullScreenContentCallback);
                                           },
                                           child: Container(
                                             alignment: Alignment.center,
@@ -916,12 +936,11 @@ class _RewardScreenState extends State<RewardScreen> {
                                   Spacer(),
                                   GestureDetector(
                                     onTap: () {
-                                      setState(() {
-                                        Preferences.totalAmount =
-                                            Preferences.getTotalAmount + 20;
-                                        setAmount();
-                                      });
-                                      splashServices.getAmount();
+                                      FullScreenContentCallback<InterstitialAd>?
+                                          fullScreenContentCallback =
+                                          FullScreenContentCallback();
+                                      AdmobHelper().createInterstitial(
+                                          fullScreenContentCallback);
                                     },
                                     child: Container(
                                       alignment: Alignment.center,
@@ -975,85 +994,91 @@ class _RewardScreenState extends State<RewardScreen> {
                           ),
                         ),
                         Gap(20),
-                        Container(
-                          width: width,
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              Image.asset(ImageConstant.invite),
-                              Gap(10),
-                              Text(
-                                'Invite your friends',
-                                style: TextStyle(
-                                  color: Color(0xFF1E1E1E),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  height: 0,
+                        GestureDetector(
+                          child: Container(
+                            width: width,
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Image.asset(ImageConstant.invite),
+                                Gap(10),
+                                Text(
+                                  'Invite your friends',
+                                  style: TextStyle(
+                                    color: Color(0xFF1E1E1E),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    height: 0,
+                                  ),
                                 ),
-                              ),
-                              Spacer(),
-                              GestureDetector(
-                                onTap: () {
-                                  Share.share(
-                                          'check out my website https://example.com',
-                                          subject: 'Look what I made!')
-                                      .then((value) {
-                                    setState(() {
-                                      Preferences.totalAmount =
-                                          Preferences.getTotalAmount + 20;
-                                      setAmount();
+                                Spacer(),
+                                GestureDetector(
+                                  onTap: () {
+                                    loadAd();
+                                    Share.share(
+                                            'check out my website https://example.com',
+                                            subject: 'Look what I made!')
+                                        .then((value) {
+                                      setState(() {
+                                        Preferences.totalAmount =
+                                            Preferences.getTotalAmount + 20;
+                                        setAmount();
+                                      });
+                                      splashServices.getAmount();
                                     });
-                                    splashServices.getAmount();
-                                  });
-                                },
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  width: width / 3.5,
-                                  height: height / 22,
-                                  decoration: ShapeDecoration(
-                                    gradient: LinearGradient(
-                                      // center: Alignment(1.04, 0.59),
-                                      // radius: 0.57,
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xFFFD6C25),
-                                        Color(0xFFFF4D1C),
-                                        Color(0xFFFC4010),
-                                        Color(0xFFFA6401),
-                                        Color(0xFFFF7623),
-                                        Color(0xFFFF7623),
+                                    log("njkjkn");
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    width: width / 3.5,
+                                    height: height / 22,
+                                    decoration: ShapeDecoration(
+                                      gradient: LinearGradient(
+                                        // center: Alignment(1.04, 0.59),
+                                        // radius: 0.57,
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          Color(0xFFFD6C25),
+                                          Color(0xFFFF4D1C),
+                                          Color(0xFFFC4010),
+                                          Color(0xFFFA6401),
+                                          Color(0xFFFF7623),
+                                          Color(0xFFFF7623),
+                                        ],
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(140),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Image(
+                                          image: AssetImage(ImageConstant.coin),
+                                          height: 24,
+                                        ),
+                                        Gap(5),
+                                        Text(
+                                          'Get 20',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        )
                                       ],
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(140),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image(
-                                        image: AssetImage(ImageConstant.coin),
-                                        height: 24,
-                                      ),
-                                      Gap(5),
-                                      Text(
-                                        'Get 20',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      )
-                                    ],
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -1064,6 +1089,39 @@ class _RewardScreenState extends State<RewardScreen> {
             ],
           ),
         ));
+  }
+
+  bool load = false;
+
+  void loadAd() {
+    RewardedAd.load(
+        adUnitId: adUnitId,
+        request: const AdRequest(),
+        rewardedAdLoadCallback: RewardedAdLoadCallback(
+          // Called when an ad is successfully received.
+
+          onAdLoaded: (ad) {
+            setState(() {
+              load = true;
+            });
+            debugPrint('$ad loaded.');
+
+            // Keep a reference to the ad so you can show it later.
+            _rewardedAd = ad;
+            setState(() {
+              load = false;
+            });
+          },
+
+          // Called when an ad request failed.
+          onAdFailedToLoad: (LoadAdError error) {
+            debugPrint('RewardedAd failed to load: $error');
+          },
+        )).then((rewardedAd) {
+      _rewardedAd!.show(onUserEarnedReward: (ad, RewardItem rewardItem) {
+        log("User earned reward: ${rewardItem.amount}");
+      });
+    });
   }
 
   List daysList = [
@@ -1104,714 +1162,3 @@ class _RewardScreenState extends State<RewardScreen> {
     },
   ];
 }
-
-/*
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
-import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
-import 'package:reward_app/util/images/imageConstant.dart';
-import 'package:reward_app/util/routes/routes_name.dart';
-
-import '../../res/Dailog/congratulationDialog.dart';
-
-class RewardScreen extends StatefulWidget {
-  const RewardScreen({super.key});
-
-  @override
-  State<RewardScreen> createState() => _RewardScreenState();
-}
-
-class _RewardScreenState extends State<RewardScreen> {
-  int currentDay = 1;
-  int totalDays = 7;
-  int collectedCoins = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    var width = MediaQuery.of(context).size.width;
-    var height = MediaQuery.of(context).size.height;
-    return Scaffold(
-      backgroundColor: Color(0xfff7f7f7),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Stack(
-              children: [
-                Container(
-                  height: height / 4,
-                  width: width,
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.yellow,
-                    borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(30),
-                        bottomLeft: Radius.circular(30)),
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: AssetImage(ImageConstant.bg),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            child: Image.asset(
-                              ImageConstant.setting,
-                              scale: 5,
-                            ),
-                            onTap: () {
-                              Navigator.pushNamed(
-                                  context, RoutesName.settingScreen);
-                            },
-                          ),
-                          Text(
-                            'RewardZone',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                  context, RoutesName.giftScreen);
-                            },
-                            child: Image.asset(
-                              ImageConstant.gift,
-                              scale: 4,
-                            ),
-                          )
-                        ],
-                      ),
-                      Gap(20),
-                      Row(
-                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Image.asset(
-                            ImageConstant.coin,
-                            scale: 5,
-                          ),
-                          Gap(10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Balance',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  height: 0,
-                                ),
-                              ),
-                              Text(
-                                '500',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              )
-                            ],
-                          ),
-                          Spacer(),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                  context, RoutesName.walletScreen);
-                            },
-                            child: Image.asset(
-                              ImageConstant.wallet,
-                              scale: 4,
-                            ),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 150),
-                    child: Container(
-                        padding: EdgeInsets.only(
-                            left: 10, right: 10, bottom: 20, top: 20),
-                        // height: 150,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        width: width * 0.88,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Check-in 7 Days To Win 220 coins',
-                              style: TextStyle(
-                                color: Color(0xFF808080),
-                                fontSize: 10,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                            SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  children: [
-                                    Image.asset(
-                                      ImageConstant.coin5,
-                                      scale: 4,
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      'Day 1',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Color(0xFF808080),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    Image.asset(
-                                      ImageConstant.coin10,
-                                      scale: 4,
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      'Day 2',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Color(0xFF808080),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    Image.asset(
-                                      ImageConstant.coin15,
-                                      scale: 4,
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      'Day 3',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Color(0xFF808080),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    Image.asset(
-                                      ImageConstant.coin20,
-                                      scale: 4,
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      'Day 4',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Color(0xFF808080),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    Image.asset(
-                                      ImageConstant.coin30,
-                                      scale: 4,
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      'Day 5',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Color(0xFF808080),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    Image.asset(
-                                      ImageConstant.coin35,
-                                      scale: 4,
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      'Day 6  ',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Color(0xFF808080),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    Image.asset(
-                                      ImageConstant.coin60,
-                                      scale: 4,
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      'Day 7',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Color(0xFF808080),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Gap(20),
-                            Center(
-                              child: GestureDetector(
-                                onTap: () {},
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  width: width * 0.7,
-                                  height: 37,
-                                  decoration: ShapeDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Color(0xFFFD6C25),
-                                        Color(0xFFFF4D1C),
-                                        Color(0xFFFC4010),
-                                        Color(0xFFFA6401),
-                                        Color(0xFFFF7623),
-                                        Color(0xFFFF7623),
-                                      ],
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(120),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'COLLECT COIN',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        )),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 350, right: 20, left: 20),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Image.asset(ImageConstant.coin, scale: 8),
-                          Gap(5),
-                          Text(
-                            'Take part in the following activities to earn coins',
-                            style: TextStyle(
-                              color: Color(0xFF808080),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Gap(20),
-                      Container(
-                        width: width,
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Column(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Free Coin',
-                                      style: TextStyle(
-                                        color: Color(0xFF1E1E1E),
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Complete 0/1',
-                                      style: TextStyle(
-                                        color: Color(0xFF787878),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Spacer(),
-                                GestureDetector(
-                                  onTap: () {
-                                    // congratulationDialog(context);
-                                    congratulationDialog2(context);
-                                  },
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    width: width / 3.5,
-                                    height: height / 22,
-                                    decoration: ShapeDecoration(
-                                      gradient: LinearGradient(
-                                        // center: Alignment(1.04, 0.59),
-                                        // radius: 0.57,
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          Color(0xFFFD6C25),
-                                          Color(0xFFFF4D1C),
-                                          Color(0xFFFC4010),
-                                          Color(0xFFFA6401),
-                                          Color(0xFFFF7623),
-                                          Color(0xFFFF7623),
-                                        ],
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(140),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Image(
-                                          image: AssetImage(ImageConstant.coin),
-                                          height: 24,
-                                        ),
-                                        Gap(5),
-                                        Text(
-                                          'Get 10',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Gap(20),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Daily Check-In',
-                                      style: TextStyle(
-                                        color: Color(0xFF1E1E1E),
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Complete 0/3',
-                                      style: TextStyle(
-                                        color: Color(0xFF787878),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Spacer(),
-                                Container(
-                                  alignment: Alignment.center,
-                                  width: width / 3.5,
-                                  height: height / 22,
-                                  decoration: ShapeDecoration(
-                                    gradient: LinearGradient(
-                                      // center: Alignment(1.04, 0.59),
-                                      // radius: 0.57,
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xFFFD6C25),
-                                        Color(0xFFFF4D1C),
-                                        Color(0xFFFC4010),
-                                        Color(0xFFFA6401),
-                                        Color(0xFFFF7623),
-                                        Color(0xFFFF7623),
-                                      ],
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(140),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image(
-                                        image: AssetImage(ImageConstant.coin),
-                                        height: 24,
-                                      ),
-                                      Gap(5),
-                                      Text(
-                                        'Get 15',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Gap(20),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '',
-                                      style: TextStyle(
-                                        color: Color(0xFF1E1E1E),
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Complete 0/2',
-                                      style: TextStyle(
-                                        color: Color(0xFF787878),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Spacer(),
-                                Container(
-                                  alignment: Alignment.center,
-                                  width: width / 3.5,
-                                  height: height / 22,
-                                  decoration: ShapeDecoration(
-                                    gradient: LinearGradient(
-                                      // center: Alignment(1.04, 0.59),
-                                      // radius: 0.57,
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xFFFD6C25),
-                                        Color(0xFFFF4D1C),
-                                        Color(0xFFFC4010),
-                                        Color(0xFFFA6401),
-                                        Color(0xFFFF7623),
-                                        Color(0xFFFF7623),
-                                      ],
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(140),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image(
-                                        image: AssetImage(ImageConstant.coin),
-                                        height: 24,
-                                      ),
-                                      Gap(5),
-                                      Text(
-                                        'Get 20',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Gap(20),
-                            Row(
-                              children: [
-                                Text(
-                                  'Play Quiz & Win Now',
-                                  style: TextStyle(
-                                    color: Color(0xFF1E1E1E),
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Spacer(),
-                                Container(
-                                  alignment: Alignment.center,
-                                  width: width / 3.5,
-                                  height: height / 22,
-                                  decoration: ShapeDecoration(
-                                    gradient: LinearGradient(
-                                      // center: Alignment(1.04, 0.59),
-                                      // radius: 0.57,
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xFFFD6C25),
-                                        Color(0xFFFF4D1C),
-                                        Color(0xFFFC4010),
-                                        Color(0xFFFA6401),
-                                        Color(0xFFFF7623),
-                                        Color(0xFFFF7623),
-                                      ],
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(140),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image(
-                                        image: AssetImage(ImageConstant.coin),
-                                        height: 24,
-                                      ),
-                                      Gap(5),
-                                      Text(
-                                        'Get 20',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Gap(20),
-                      Container(
-                        width: width,
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            Image.asset(ImageConstant.invite),
-                            Gap(10),
-                            Text(
-                              'Invite your friends',
-                              style: TextStyle(
-                                color: Color(0xFF1E1E1E),
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                height: 0,
-                              ),
-                            ),
-                            Spacer(),
-                            Container(
-                              alignment: Alignment.center,
-                              width: width / 3.5,
-                              height: height / 22,
-                              decoration: ShapeDecoration(
-                                gradient: LinearGradient(
-                                  // center: Alignment(1.04, 0.59),
-                                  // radius: 0.57,
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Color(0xFFFD6C25),
-                                    Color(0xFFFF4D1C),
-                                    Color(0xFFFC4010),
-                                    Color(0xFFFA6401),
-                                    Color(0xFFFF7623),
-                                    Color(0xFFFF7623),
-                                  ],
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(140),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image(
-                                    image: AssetImage(ImageConstant.coin),
-                                    height: 24,
-                                  ),
-                                  Gap(5),
-                                  Text(
-                                    'Get 20',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-*/
